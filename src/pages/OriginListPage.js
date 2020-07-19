@@ -5,7 +5,7 @@ import { Input, Button, Table, PageHeader } from "antd";
 import { ACCESS_VALUE_KEY, ACCES_ID_KEY } from "../lib/constants";
 import useArrayState from "../hooks/useArrayState";
 
-const INPUT_MAX_WIDTH = 220;
+const INPUT_WIDTH = 200;
 
 const OriginListPage = ({
   userSess,
@@ -32,16 +32,21 @@ const OriginListPage = ({
 
     const [firstEntry] = origins;
     return Object.keys(firstEntry).map((key) => {
-      const baseColumn = { title: key, dataIndex: key, key };
+      const baseColumn = {
+        title: key,
+        dataIndex: key,
+        key,
+      };
+
       if (key === ACCESS_VALUE_KEY) {
         return {
           ...baseColumn,
-          render: (_, record, index) => (
+          render: (v, r, index) => (
             <div className="flex items-center">
               <Input
                 value={dirtyAccessValues[index]}
                 placeholder="Token"
-                style={{ maxWidth: INPUT_MAX_WIDTH }}
+                style={{ width: INPUT_WIDTH }}
                 onChange={(e) => setDirtyAccessValue(index, e.target.value)}
               />
               <div className="px-1">&nbsp;</div>
@@ -91,6 +96,7 @@ const OriginListPage = ({
               key: origin[ACCES_ID_KEY],
             }))}
             pagination={false}
+            scroll={{ x: true }}
           />
         </div>
       )}
