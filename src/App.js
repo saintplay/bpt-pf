@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
-import get from "lodash.get";
-import { Button, Input, Layout, Form } from "antd";
 
-import { LIST_ORIGIN_ACCESS } from "./lib/endpoints";
-import { USER_ID } from "./lib/constants";
+import { Layout } from "antd";
+
+import OriginListPage from "./pages/OriginListPage";
+import SearchUserPage from "./pages/SearchUserPage";
 
 const { Content, Header, Footer } = Layout;
 
@@ -12,41 +11,14 @@ const HEADER_HEIGHT = 64;
 const FOOTER_HEIGHT = 70;
 
 const App = () => {
-  const [form] = Form.useForm();
-  const [searching, setSearching] = useState(false);
-  const [errorSearching, setErrorSearching] = useState(false);
+  // Using a plan state instead of react-router because this is a prototype
+  const [page, setPage] = useState(0);
 
-  const onFinish = async (values) => {
-    setSearching(true);
-    setErrorSearching(false);
-    try {
-      const response = await axios.post(LIST_ORIGIN_ACCESS, {
-        Sess: {
-          ...values,
-          usuario_id: USER_ID,
-        },
-      });
-      setSearching(false);
-      const error = get(response, "data.ErrorCode", false);
+  const [origins, setOrigins] = useState([]);
 
-      if (error) {
-        setErrorSearching(
-          get(response, "data.Message", "Hubo un error. ¡Inténtalo nuevamente!")
-        );
-      } else {
-        const data = get(response, "data.data", []);
-        const origins = get(data, "[0].origen_acceso", []);
-
-        if (!data || !data.length || !origins || !origins.length) {
-          setErrorSearching("¡El usuario no tiene registros!");
-        }
-        console.log(origins);
-      }
-    } catch (err) {
-      console.error(err);
-      setSearching(false);
-      setErrorSearching(true);
-    }
+  const onSearchUserSuccess = (_origins) => {
+    setOrigins(_origins);
+    setPage(1);
   };
 
   return (
@@ -60,28 +32,10 @@ const App = () => {
           minHeight: `calc(100vh - ${HEADER_HEIGHT + FOOTER_HEIGHT}px)`,
         }}
       >
-        <Form form={form} layout="vertical" onFinish={onFinish}>
-          <Form.Item
-            label="Usuario"
-            name="User"
-            rules={[{ required: true, message: "¡Ingresa el usuario!" }]}
-          >
-            <Input placeholder="Usuario" />
-          </Form.Item>
-          <Form.Item
-            label="Token"
-            name="Token"
-            rules={[{ required: true, message: "¡Ingresa el token!" }]}
-          >
-            <Input type="number" placeholder="Token" />
-          </Form.Item>
-          <Form.Item shouldUpdate={true}>
-            <Button type="primary" htmlType="submit" loading={searching}>
-              Buscar
-            </Button>
-            {errorSearching && <div className="text-red">{errorSearching}</div>}
-          </Form.Item>
-        </Form>
+        {page === 0 && <SearchUserPage onSuccess={onSearchUserSuccess} />}
+        {page === 1 && (
+          <OriginListPage origins={origins} onGoBack={() => setPage(0)} />
+        )}
       </Content>
       <Footer className="text-center">Made by Diego Jara</Footer>
     </Layout>
