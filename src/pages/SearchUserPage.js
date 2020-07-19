@@ -8,6 +8,8 @@ import get from "lodash.get";
 import { USER_ID } from "../lib/constants";
 import { LIST_ORIGIN_ACCESS } from "../lib/endpoints";
 
+const INPUT_MAX_WIDTH = 320;
+
 const SearchUserPage = ({ onSuccess }) => {
   const [form] = Form.useForm();
 
@@ -38,7 +40,7 @@ const SearchUserPage = ({ onSuccess }) => {
         if (!data || !data.length || !origins || !origins.length) {
           setErrorSearching("¡El usuario no tiene registros!");
         }
-        onSuccess(origins);
+        onSuccess(values, origins);
       }
     } catch (err) {
       console.error(err);
@@ -54,22 +56,21 @@ const SearchUserPage = ({ onSuccess }) => {
         name="User"
         rules={[{ required: true, message: "¡Ingresa el usuario!" }]}
       >
-        <Input placeholder="Usuario" />
+        <Input placeholder="Usuario" style={{ maxWidth: INPUT_MAX_WIDTH }} />
       </Form.Item>
       <Form.Item
         label="Token"
         name="Token"
         rules={[{ required: true, message: "¡Ingresa el token!" }]}
       >
-        <Input type="number" placeholder="Token" />
+        <Input
+          type="number"
+          placeholder="Token"
+          style={{ maxWidth: INPUT_MAX_WIDTH }}
+        />
       </Form.Item>
       <Form.Item shouldUpdate={true}>
-        <Button
-          type="primary"
-          htmlType="submit"
-          size="small"
-          loading={searching}
-        >
+        <Button type="primary" htmlType="submit" loading={searching}>
           Buscar
         </Button>
         {errorSearching && <div className="text-red">{errorSearching}</div>}

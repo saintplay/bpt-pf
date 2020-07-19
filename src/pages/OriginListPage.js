@@ -4,7 +4,9 @@ import { Input, Button, Table, PageHeader } from "antd";
 
 import { ACCESS_VALUE_KEY, ACCES_ID_KEY } from "../lib/constants";
 
-const OriginListPage = ({ origins, onGoBack }) => {
+const INPUT_MAX_WIDTH = 220;
+
+const OriginListPage = ({ userSess, origins, onGoBack }) => {
   const hasNoData = !origins.length;
 
   const columns = useMemo(() => {
@@ -17,14 +19,14 @@ const OriginListPage = ({ origins, onGoBack }) => {
         return {
           ...baseColumn,
           render: (access_value, record) => (
-            <div className="flex">
+            <div className="flex items-center">
               <Input
                 value={access_value}
                 placeholder="Token"
-                style={{ maxWidth: 220 }}
+                style={{ maxWidth: INPUT_MAX_WIDTH }}
               />
               <div className="px-1">&nbsp;</div>
-              <Button type="primary" onClick={() => null}>
+              <Button type="primary" size="small" onClick={() => null}>
                 Actualizar
               </Button>
             </div>
@@ -37,7 +39,11 @@ const OriginListPage = ({ origins, onGoBack }) => {
 
   return (
     <div>
-      <PageHeader className="px-0" onBack={onGoBack} subTitle="Regresar" />
+      <PageHeader
+        className="px-0"
+        onBack={onGoBack}
+        title={`Sesiones de ${userSess.User}`}
+      />
       {!hasNoData && (
         <div>
           <Table
@@ -55,6 +61,7 @@ const OriginListPage = ({ origins, onGoBack }) => {
 };
 
 OriginListPage.propTypes = {
+  userSess: PropTypes.object.isRequired,
   origins: PropTypes.array,
   onGoBack: PropTypes.func,
 };
