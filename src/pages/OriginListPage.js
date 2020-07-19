@@ -31,7 +31,10 @@ const OriginListPage = ({
     if (hasNoData) return [];
 
     const [firstEntry] = origins;
-    return Object.keys(firstEntry).map((key) => {
+
+    // We need to sort, because objects can't guarantee order structurally
+    const keys = Object.keys(firstEntry).sort();
+    return keys.map((key) => {
       const baseColumn = {
         title: key,
         dataIndex: key,
