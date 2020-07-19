@@ -10,7 +10,7 @@ import { LIST_ORIGIN_ACCESS } from "../lib/endpoints";
 
 const INPUT_MAX_WIDTH = 320;
 
-const SearchUserPage = ({ onSuccess }) => {
+const SearchUserPage = ({ userSess, onSuccess }) => {
   const [form] = Form.useForm();
 
   const [searching, setSearching] = useState(false);
@@ -27,8 +27,8 @@ const SearchUserPage = ({ onSuccess }) => {
         },
       });
       setSearching(false);
-      const error = get(response, "data.ErrorCode", false);
 
+      const error = get(response, "data.ErrorCode", false);
       if (error) {
         setErrorSearching(
           get(response, "data.Message", "Hubo un error. ¡Inténtalo nuevamente!")
@@ -50,7 +50,12 @@ const SearchUserPage = ({ onSuccess }) => {
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish}>
+    <Form
+      form={form}
+      initialValues={userSess}
+      layout="vertical"
+      onFinish={onFinish}
+    >
       <Form.Item
         label="Usuario"
         name="User"
@@ -64,7 +69,9 @@ const SearchUserPage = ({ onSuccess }) => {
         rules={[{ required: true, message: "¡Ingresa el token!" }]}
       >
         <Input
-          type="number"
+          // Do not use type=number here
+          //because some browsers don't handle that many decimals
+          // type="number"
           placeholder="Token"
           style={{ maxWidth: INPUT_MAX_WIDTH }}
         />
@@ -80,9 +87,11 @@ const SearchUserPage = ({ onSuccess }) => {
 };
 
 SearchUserPage.propTypes = {
+  userSess: PropTypes.object,
   onSuccess: PropTypes.func,
 };
 SearchUserPage.defaultProps = {
+  userSess: {},
   onSuccess: () => {},
 };
 

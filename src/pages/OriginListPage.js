@@ -1,12 +1,30 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { Input, Button, Table, PageHeader } from "antd";
 
 import { ACCESS_VALUE_KEY, ACCES_ID_KEY } from "../lib/constants";
+import useArrayState from "../hooks/useArrayState";
 
 const INPUT_MAX_WIDTH = 220;
 
-const OriginListPage = ({ userSess, origins, onGoBack }) => {
+const OriginListPage = ({
+  userSess,
+  origins,
+  updatingOrigins,
+  onUpdateAccessValue,
+  onGoBack,
+}) => {
+  const [
+    dirtyAccessValues,
+    setDirtyAccessValues,
+    setDirtyAccessValue,
+  ] = useArrayState(origins.map((o) => o[ACCESS_VALUE_KEY]));
+
+  // Clean dirty values if origins change gracefully
+  useEffect(() => {
+    setDirtyAccessValues(origins.map((o) => o[ACCESS_VALUE_KEY]));
+  }, [origins, setDirtyAccessValues]);
+
   const hasNoData = !origins.length;
 
   const columns = useMemo(() => {
@@ -18,15 +36,26 @@ const OriginListPage = ({ userSess, origins, onGoBack }) => {
       if (key === ACCESS_VALUE_KEY) {
         return {
           ...baseColumn,
-          render: (access_value, record) => (
+          render: (_, record, index) => (
             <div className="flex items-center">
               <Input
-                value={access_value}
+                value={dirtyAccessValues[index]}
                 placeholder="Token"
                 style={{ maxWidth: INPUT_MAX_WIDTH }}
+                onChange={(e) => setDirtyAccessValue(index, e.target.value)}
               />
               <div className="px-1">&nbsp;</div>
-              <Button type="primary" size="small" onClick={() => null}>
+              <Button
+                type="primary"
+                size="small"
+                loading={updatingOrigins[index]}
+                disabled={
+                  dirtyAccessValues[index] === origins[index][ACCESS_VALUE_KEY]
+                }
+                onClick={() =>
+                  onUpdateAccessValue(dirtyAccessValues[index], index)
+                }
+              >
                 Actualizar
               </Button>
             </div>
@@ -35,7 +64,16 @@ const OriginListPage = ({ userSess, origins, onGoBack }) => {
       }
       return baseColumn;
     });
-  }, [origins, hasNoData]);
+    // Many of these functions are not triggering computations
+    // Just used for eslint/rules-of-hooks
+  }, [
+    hasNoData,
+    origins,
+    dirtyAccessValues,
+    updatingOrigins,
+    setDirtyAccessValue,
+    onUpdateAccessValue,
+  ]);
 
   return (
     <div>
@@ -63,10 +101,14 @@ const OriginListPage = ({ userSess, origins, onGoBack }) => {
 OriginListPage.propTypes = {
   userSess: PropTypes.object.isRequired,
   origins: PropTypes.array,
+  updatingOrigins: PropTypes.array,
+  onUpdateAccessValue: PropTypes.func,
   onGoBack: PropTypes.func,
 };
 OriginListPage.defaultProps = {
   origins: [],
+  updatingOrigins: [],
+  onUpdateAccessValue: () => {},
   onGoBack: () => {},
 };
 
